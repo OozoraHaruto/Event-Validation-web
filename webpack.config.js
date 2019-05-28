@@ -52,20 +52,8 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       'process.env': {
-        AUTH_COMPANY: JSON.stringify(process.env.AUTH_COMPANY),
-        AUTH_USER: JSON.stringify(process.env.AUTH_USER),
-        CLOUDINARY_KEY: JSON.stringify(process.env.CLOUDINARY_KEY),
-        CLOUDINARY_NAME: JSON.stringify(process.env.CLOUDINARY_NAME),
-        CLOUDINARY_SECRET: JSON.stringify(process.env.CLOUDINARY_SECRET),
-        CLOUDINARY_UPLOAD_COMPANY_LOGO: JSON.stringify(process.env.CLOUDINARY_UPLOAD_COMPANY_LOGO),
-        CLOUDINARY_UPLOAD_PROFILE_PICTURE: JSON.stringify(process.env.CLOUDINARY_UPLOAD_PROFILE_PICTURE),
-        CLOUDINARY_UPLOAD_QUALIFICATION: JSON.stringify(process.env.CLOUDINARY_UPLOAD_QUALIFICATION),
-        JWT_SECRET: JSON.stringify(process.env.JWT_SECRET),
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        PUSHER_APP_ID: JSON.stringify(process.env.PUSHER_APP_ID),
-        PUSHER_CLUSTER: JSON.stringify(process.env.PUSHER_CLUSTER),
-        PUSHER_KEY: JSON.stringify(process.env.PUSHER_KEY),
-        PUSHER_SECRET: JSON.stringify(process.env.PUSHER_SECRET),
+        P_10: JSON.stringify(process.env.P_10),
       }
     })
   ],
