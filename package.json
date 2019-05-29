@@ -34,6 +34,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "bcryptjs": "^2.4.3",
+    "big-integer": "^1.6.43",
     "body-parser": "^1.18.3",
     "bookshelf": "^0.13.3",
     "bootstrap": "^4.1.3",

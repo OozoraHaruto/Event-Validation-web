@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import DocumentMeta from 'react-document-meta';
 var QRCode = require('qrcode')
+var bigInt = require("big-integer");
 
 export class MainPage extends React.Component{
   constructor(props) {
@@ -28,12 +29,8 @@ export class MainPage extends React.Component{
       date: "16/02/2019-22/9/2019",
       website: "https://twitter.com/_amatsuki_",
     }
-    var additionalData = {
-      version: 1.0,
-      generator: 2,
-      prime: 2,
-      hash: "?"
-    }
+    var secrets = this.generateSecrets();
+    var hash = "?"
     var opts = {
       errorCorrectionLevel: 'H',
       type: 'image/jpeg',
@@ -47,10 +44,12 @@ export class MainPage extends React.Component{
       e: obj.eventName,
       d: obj.date,
       w: obj.website,
-      v: additionalData.version,
-      g: additionalData.generator,
-      p: additionalData.prime,
-      h: additionalData.hash,
+      v: 1.0,                                   // QR version
+      g: secrets.generatorIndex,                // Generator Index 
+      p: secrets.primeIndex,                    // Prime Number Index
+      k: secrets.privateIndex,                  // Private Key Index
+      y: secrets.public,                        // Public Key
+      h: hash,                                  // Hash of un encrypted data
     };
 
     QRCode.toDataURL(JSON.stringify(objText), opts, function (err, url) {
@@ -60,6 +59,33 @@ export class MainPage extends React.Component{
         imgLink: url
       })
     })
+  }
+
+  getRandomInt = max => Math.floor(Math.random() * Math.floor(max));
+
+  generateSecrets = () =>{
+    var secrets             = {};
+    var startIndex          = 0;
+
+    secrets.prime           = process.env.P_10.split(";");
+    secrets.primeIndex      = this.getRandomInt(secrets.prime.length);
+    secrets.prime           = secrets.prime[secrets.primeIndex];
+
+    startIndex              = secrets.prime.indexOf("[")
+    secrets.generator       = secrets.prime.substring(startIndex+1, secrets.prime.length-1).split(")");
+    secrets.prime           = secrets.prime.substring(0, startIndex);
+    secrets.generatorIndex  = this.getRandomInt(secrets.generator.length);
+    secrets.generator       = secrets.generator[secrets.generatorIndex];
+
+    startIndex              = secrets.generator.indexOf("(");
+    secrets.private         = secrets.generator.substring(startIndex + 1, secrets.generator.length - 1).split(",");
+    secrets.generator       = secrets.generator.substring(0, startIndex);
+    secrets.privateIndex    = this.getRandomInt(secrets.private.length);
+    secrets.private         = secrets.private[secrets.privateIndex];
+
+    secrets.public          = this.generatePublicKey(bigInt(secrets.prime), bigInt(secrets.generator), bigInt(secrets.private));
+
+    return secrets;
   }
 
   encryptData = (obj) =>{
@@ -96,11 +122,14 @@ export class MainPage extends React.Component{
     return str;
   }
 
+  generatePublicKey = (p, g, privateKey) => g.modPow(privateKey, p).value;
+
+  generateSharedKey = (user1Prik, user2Pubk, p) => user2Pubk.modPow(user1Prik, p).value;
+
   render(){
     var meta = {
       title: "Page Title"
     }
-    var p10 = process.env.P_10.split(",");
     var {imgLink} = this.state;
     
     return(
