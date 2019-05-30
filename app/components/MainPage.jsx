@@ -29,7 +29,7 @@ export class MainPage extends React.Component{
       date: "16/02/2019-22/9/2019",
       website: "https://twitter.com/_amatsuki_",
     }
-    var secrets = this.generateSecrets();
+    var secrets = this.generateSecrets(10);
     var hash = "?"
     var opts = {
       errorCorrectionLevel: 'H',
@@ -38,8 +38,8 @@ export class MainPage extends React.Component{
         quality: 1
       }
     }
-    var obj = this.encryptData(obj3);
-    console.log(this.decryptData(obj))
+    var obj = this.encryptDataObj(obj3, secrets);
+    console.log("decrypt", this.decryptDataObj(obj, secrets))
     var objText = {
       e: obj.eventName,
       d: obj.date,
@@ -47,79 +47,150 @@ export class MainPage extends React.Component{
       v: 1.0,                                   // QR version
       g: secrets.generatorIndex,                // Generator Index 
       p: secrets.primeIndex,                    // Prime Number Index
-      k: secrets.privateIndex,                  // Private Key Index
-      y: secrets.public,                        // Public Key
+      y: secrets.publicA.toString(),            // Public Key
+      k: secrets.privateBIndex,                 // Private Key
       h: hash,                                  // Hash of un encrypted data
     };
 
     QRCode.toDataURL(JSON.stringify(objText), opts, function (err, url) {
       if (err) throw err
-
-      that.setState({
-        imgLink: url
-      })
+      that.setState({ imgLink: url })
     })
+    console.log(objText)
   }
 
   getRandomInt = max => Math.floor(Math.random() * Math.floor(max));
 
-  generateSecrets = () =>{
-    var secrets             = {};
-    var startIndex          = 0;
+  generateSecrets = length =>{
+    var secrets               = {};
+    var startIndex            = 0;
+    switch (length) {
+      case 10: secrets.prime  = process.env.P_10.split(";"); break;
+    
+      default: secrets.prime  = process.env.P_10.split(";"); break;
+    }
 
-    secrets.prime           = process.env.P_10.split(";");
-    secrets.primeIndex      = this.getRandomInt(secrets.prime.length);
-    secrets.prime           = secrets.prime[secrets.primeIndex];
+    secrets.pLength           = length;
+    secrets.primeIndex        = this.getRandomInt(secrets.prime.length);
+    secrets.prime             = secrets.prime[secrets.primeIndex];
 
-    startIndex              = secrets.prime.indexOf("[")
-    secrets.generator       = secrets.prime.substring(startIndex+1, secrets.prime.length-1).split(")");
-    secrets.prime           = secrets.prime.substring(0, startIndex);
-    secrets.generatorIndex  = this.getRandomInt(secrets.generator.length);
-    secrets.generator       = secrets.generator[secrets.generatorIndex];
+    startIndex                = secrets.prime.indexOf("[")
+    secrets.generator         = secrets.prime.substring(startIndex+1, secrets.prime.length-1).split(")");
+    secrets.prime             = secrets.prime.substring(0, startIndex);
+    secrets.generatorIndex    = this.getRandomInt(secrets.generator.length);
+    secrets.generator         = secrets.generator[secrets.generatorIndex];
 
-    startIndex              = secrets.generator.indexOf("(");
-    secrets.private         = secrets.generator.substring(startIndex + 1, secrets.generator.length - 1).split(",");
-    secrets.generator       = secrets.generator.substring(0, startIndex);
-    secrets.privateIndex    = this.getRandomInt(secrets.private.length);
-    secrets.private         = secrets.private[secrets.privateIndex];
+    startIndex                = secrets.generator.indexOf("(");
+    secrets.private           = secrets.generator.substring(startIndex + 1, secrets.generator.length - 1).split(",");
+    secrets.generator         = secrets.generator.substring(0, startIndex);
+    secrets.privateAIndex     = this.getRandomInt(secrets.private.length);
+    secrets.privateA          = secrets.private[secrets.privateAIndex];
+    secrets.privateBIndex     = this.getRandomInt(secrets.private.length);
+    secrets.privateB          = secrets.private[secrets.privateBIndex];
 
-    secrets.public          = this.generatePublicKey(bigInt(secrets.prime), bigInt(secrets.generator), bigInt(secrets.private));
+    secrets.publicA           = this.generatePublicKey(bigInt(secrets.prime), bigInt(secrets.generator), bigInt(secrets.privateA));
+    secrets.publicB           = this.generatePublicKey(bigInt(secrets.prime), bigInt(secrets.generator), bigInt(secrets.privateB));
 
     return secrets;
   }
 
-  encryptData = (obj) =>{
-    obj.eventName   = this.asciiToHex(encodeURIComponent(obj.eventName));
-    obj.date        = this.asciiToHex(encodeURIComponent(obj.date));
-    obj.website     = this.asciiToHex(encodeURIComponent(obj.website));
-    console.log(obj)
-
+  encryptDataObj = (obj, secrets) =>{
+    var sharedKey   = this.generateSharedKey(bigInt(secrets.privateA), bigInt(secrets.publicB), bigInt(secrets.prime));
+    obj.eventName   = this.encryptData(obj.eventName, sharedKey, bigInt(secrets.prime), secrets.pLength);
+    obj.date        = this.encryptData(obj.date, sharedKey, bigInt(secrets.prime), secrets.pLength);
+    obj.website     = this.encryptData(obj.website, sharedKey, bigInt(secrets.prime), secrets.pLength);
     return obj;
   }
 
-  decryptData = (obj) =>{
-    var tmp = {}
-    tmp.eventName   = decodeURIComponent(this.hexToAscii(obj.eventName));
-    tmp.date        = decodeURIComponent(this.hexToAscii(obj.date));
-    tmp.website     = decodeURIComponent(this.hexToAscii(obj.website));
+  encodeText = tmp => { //ASCII -> Hex -> Decimal
+    tmp = encodeURIComponent(tmp)
+    var str = '';
+    for (var i = 0; i < tmp.length; i++) {
+      var hex = tmp[i].charCodeAt(0).toString(16);
+      str += ("0" + parseInt(hex[0], 16)).slice(-2);
+      str += ("0" + parseInt(hex[1], 16)).slice(-2);
+    }
+    return str;
+  }
 
+  encryptData = (data, sharedKey, prime, pLength) => {
+    var encryptedParts  = [];
+    var encodedData     = this.encodeText(data);
+    var currentLength   = 0;
+    var mLength         = pLength - 1;
+    var lastPartLength  = encodedData.length % mLength;
+    do{
+      var tmp           = ((bigInt(encodedData.substr(currentLength, mLength)).multiply(sharedKey)).divmod(prime)).remainder
+      encryptedParts.push(this.Base64.fromNumber(tmp))
+      currentLength += 9;
+    }while(currentLength<encodedData.length)
+    return (encryptedParts.toString() + ";" + lastPartLength);
+  }
+
+  decryptDataObj = (obj, secrets) =>{
+    var sharedKey   = this.generateSharedKey(bigInt(secrets.privateB), bigInt(secrets.publicA), bigInt(secrets.prime))
+    var tmp         = {}
+    tmp.eventName   = this.decryptData(obj.eventName, sharedKey, bigInt(secrets.prime), secrets.pLength);
+    tmp.date        = this.decryptData(obj.date, sharedKey, bigInt(secrets.prime), secrets.pLength);
+    tmp.website     = this.decryptData(obj.website, sharedKey, bigInt(secrets.prime), secrets.pLength);
     return tmp;
   }
 
-  asciiToHex = (tmp) =>{
+  decodeText = tmp =>{ //decimal -> Hex -> ASCII
     var str = '';
-    for (var i = 0; i < tmp.length; i++) {
-      str += tmp[i].charCodeAt(0).toString(16);
+    for (var n = 0; n < tmp.length; n += 4) {
+      var hex = parseInt(tmp.substr(n, 2)).toString(16) + parseInt(tmp.substr((n+2), 2)).toString(16)
+      str    += String.fromCharCode(parseInt(hex, 16));
     }
-    return str;
+    return decodeURIComponent(str);
   }
 
-  hexToAscii = (tmp) =>{
-    var str = '';
-    for (var n = 0; n < tmp.length; n += 2) {
-      str += String.fromCharCode(parseInt(tmp.substr(n, 2), 16));
+  decryptData = (cipherText, sharedKey, prime, pLength) => {
+    var encryptedParts          = cipherText.split(",")
+    var decryptedString         = "";
+    var mLength                 = pLength - 1;
+    var lastIndex               = encryptedParts.length - 1
+    var lastPartLength          = encryptedParts[lastIndex].substr(encryptedParts[lastIndex].indexOf(";")+1);
+    encryptedParts[lastIndex]   = encryptedParts[lastIndex].substr(0, encryptedParts[lastIndex].indexOf(";"))
+    
+    for (var i = 0; i < encryptedParts.length; i++) {
+      var tmp = (bigInt(this.Base64.toNumber(encryptedParts[i])).multiply(bigInt(sharedKey).modInv(prime))).divmod(prime).remainder.value.toString();
+      while(tmp.length != (i == lastIndex ? lastPartLength : mLength)){
+        tmp = "0" + tmp;
+      }
+      decryptedString += tmp;
     }
-    return str;
+    return this.decodeText(decryptedString);
+  }
+
+  Base64 = {
+    _Rixits:
+      //   0       8       16      24      32      40      48      56     63
+      //   v       v       v       v       v       v       v       v      v
+          "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/",
+
+    fromNumber: function (number){
+      number            = number.toString();
+      var result        = "";
+      var currentIdx    = 0;
+
+      do{
+        var numComb     = parseInt(number.substr(currentIdx, 2));
+        if (numComb < 10 || numComb > 63) 
+          result       += number[currentIdx++];
+        else {
+          result       += this._Rixits[numComb];
+          currentIdx   += 2;
+        }
+      } while (number.length > currentIdx);
+      return result;
+    },
+    toNumber: function (rixits){
+      var result        = "";
+      for(var i=0; i<rixits.length;i++) 
+        result         += this._Rixits.indexOf(rixits[i]);
+      return result;
+    }
   }
 
   generatePublicKey = (p, g, privateKey) => g.modPow(privateKey, p).value;
