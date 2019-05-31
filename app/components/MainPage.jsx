@@ -124,7 +124,7 @@ export class MainPage extends React.Component{
       encryptedParts.push(this.Base64.fromNumber(tmp))
       currentLength += 9;
     }while(currentLength<encodedData.length)
-    return (encryptedParts.toString() + ";" + lastPartLength);
+    return (encryptedParts.toString() + ";" + ((lastPartLength == 0) ? mLength : lastPartLength));
   }
 
   decryptDataObj = (obj, secrets) =>{
