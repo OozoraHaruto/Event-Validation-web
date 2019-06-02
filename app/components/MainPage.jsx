@@ -45,6 +45,7 @@ export class MainPage extends React.Component{
       d: obj.date,
       w: obj.website,
       v: 1.0,                                   // QR version
+      l: secrets.pLength,                       // Prime number length
       g: secrets.generatorIndex,                // Generator Index 
       p: secrets.primeIndex,                    // Prime Number Index
       y: secrets.publicA.toString(),            // Public Key
