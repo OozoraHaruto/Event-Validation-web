@@ -15,9 +15,9 @@ export class MainPage extends React.Component{
   componentDidMount(){
     var that = this;
     var obj1 = {
-      eventName: "Jogging at 10pm",
-      date: "16/10/2019,22/9/2019",
-      website: "http://www.oozorataiyo.com",
+      eventName: "Malcolm website",
+      date: "16/10/2019,22/9/2019,06/06/2019,24/06/2019",
+      website: "http://www.ozorataiyo.com",
     }
     var obj2 = {
       eventName: "はるはのチックトック動画を見ています",
@@ -156,7 +156,7 @@ export class MainPage extends React.Component{
     
     for (var i = 0; i < encryptedParts.length; i++) {
       var tmp = (bigInt(this.Base64.toNumber(encryptedParts[i])).multiply(bigInt(sharedKey).modInv(prime))).divmod(prime).remainder.value.toString();
-      while(tmp.length != (i == lastIndex ? lastPartLength : mLength)){
+      while(tmp.length < (i == lastIndex ? lastPartLength : mLength)){
         tmp = "0" + tmp;
       }
       decryptedString += tmp;
