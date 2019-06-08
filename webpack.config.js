@@ -82,7 +82,8 @@ module.exports = {
       actions: 'app/redux/actions.jsx',
       reducers: 'app/redux/reducers.jsx',
       reduxConstants: 'app/redux/constants.jsx',
-      configureStore: 'app/redux/configureStore.jsx'
+      configureStore: 'app/redux/configureStore.jsx',
+      encryptionDecryption: 'app/api/EncryptionDecryption.js',
     },
     extensions: ['.js', '.jsx']
   },
