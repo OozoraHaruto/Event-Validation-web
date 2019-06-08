@@ -1,12 +1,16 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import DocumentMeta from 'react-document-meta';
+import { Formik } from 'formik';
 
 var QRCode = require('qrcode')
 
 import { generateSecrets, encryptDataObj, decryptDataObj } from 'EncryptionDecryption';
+import QRInfo from 'app/components/forms/QRInfo';
 
-export class MainPage extends React.Component{
+
+
+export class GenerateQR extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -14,25 +18,8 @@ export class MainPage extends React.Component{
     }
   }
 
-  componentDidMount(){
+  handleFormSubmission = values => {
     var that = this;
-    const testObj = [
-      {
-        eventName: "Malcolm website",
-        date: "2019/10/16,2019/09/22,2019/06/06,2019/06/24",
-        website: "http://www.ozorataiyo.com",
-      },
-      {
-        eventName: "はるはのチックトック動画を見ています",
-        date: "2018/10/16-2019/09/22",
-        website: "http://vt.tiktok.com/JAXNDx/",
-      },
-      {
-        eventName: "I love 天月-あまつき- songs",
-        date: "2019/02/16-2019/09/22",
-        website: "https://twitter.com/_amatsuki_",
-      }
-    ]
     const opts = {
       errorCorrectionLevel: 'H',
       type: 'image/jpeg',
@@ -43,9 +30,9 @@ export class MainPage extends React.Component{
     var hash = "?"
     const secrets = generateSecrets(10);
     var obj = {}
-    do{
-      obj = encryptDataObj(testObj[1], secrets);
-    } while (testObj[1].eventName != decryptDataObj(obj, secrets).eventName);
+    do {
+      obj = encryptDataObj(values, secrets);
+    } while (values.eventName != decryptDataObj(obj, secrets).eventName);
     var objText = {
       e: obj.eventName,
       d: obj.date,
@@ -65,21 +52,29 @@ export class MainPage extends React.Component{
     })
   }
 
-  render(){
+  render() {
     var meta = {
-      title: "Home"
+      title: "Generate QR Code"
     }
-    var {imgLink} = this.state;
-    
-    return(
+    var { imgLink } = this.state;
+
+    return (
       <DocumentMeta {...meta}>
         <div className="text-center">
-          <h1 className="display-1">This is what we do</h1>
-          {imgLink == "" ? "Loading..." : <img src={imgLink} />}
+          <div className="container-fluid">
+            <div className="row">
+              <div className="col-12 col-md-6">
+                <QRInfo handleFormSubmission={this.handleFormSubmission} />
+              </div>
+              <div className="col-12 col-md-6">
+                {imgLink == "" ? "Submit form to generate QR Code" : <img src={imgLink} className="w-100" />}
+              </div>
+            </div>
+          </div>
         </div>
       </DocumentMeta>
     )
   }
 }
 
-export default MainPage;
+export default GenerateQR;

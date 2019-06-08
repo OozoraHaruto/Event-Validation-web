@@ -7,11 +7,14 @@ import {BrowserRouter as Router, Switch, Route, Redirect} from 'react-router-dom
 import MainPage from 'MainPage';
 import ZWrapper from 'ZWrapper';
 
+import GenerateQR from 'GenerateQR';
+
 export default(
   <Router>
     <ZWrapper>
       <Switch>
         <Route exact path='/' component={MainPage}/>
+        <Route exact path='/generate' component={GenerateQR}/>
 
         {/* <Route component={Error404} /> */}
       </Switch>
