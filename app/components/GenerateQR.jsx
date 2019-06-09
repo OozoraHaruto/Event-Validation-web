@@ -6,7 +6,7 @@ import { Formik } from 'formik';
 var QRCode = require('qrcode')
 
 import { generateSecrets, encryptDataObj, decryptDataObj } from 'EncryptionDecryption';
-import QRInfo from 'app/components/forms/QRInfo';
+import QRInfoForm from 'app/components/forms/QRInfoForm';
 
 
 
@@ -19,21 +19,28 @@ export class GenerateQR extends React.Component {
   }
 
   handleFormSubmission = values => {
-    var that = this;
-    const opts = {
+    var that              = this;
+    const replaceDateDashToSlash = date => date.replace(/-/g, "/");
+    const opts            = {
       errorCorrectionLevel: 'H',
       type: 'image/jpeg',
       rendererOpts: {
         quality: 1
       }
     }
-    var hash = "?"
-    const secrets = generateSecrets(10);
-    var obj = {}
+    var hash              = "?"
+    const secrets         = generateSecrets(10);
+    var obj               = {
+      ...values,
+      date: replaceDateDashToSlash(values.date.toString())
+    }
+    if(values.dateType == "Range"){
+      obj.date            = obj.date.replace(",", "-")
+    }
     do {
-      obj = encryptDataObj(values, secrets);
+      obj                 = encryptDataObj(obj, secrets);
     } while (values.eventName != decryptDataObj(obj, secrets).eventName);
-    var objText = {
+    var objText           = {
       e: obj.eventName,
       d: obj.date,
       w: obj.website,
@@ -56,19 +63,18 @@ export class GenerateQR extends React.Component {
     var meta = {
       title: "Generate QR Code"
     }
-    var { imgLink } = this.state;
+    var { imgLink }       = this.state;
 
     return (
       <DocumentMeta {...meta}>
-        <div className="text-center">
-          <div className="container-fluid">
-            <div className="row">
-              <div className="col-12 col-md-6">
-                <QRInfo handleFormSubmission={this.handleFormSubmission} />
-              </div>
-              <div className="col-12 col-md-6">
-                {imgLink == "" ? "Submit form to generate QR Code" : <img src={imgLink} className="w-100" />}
-              </div>
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-12 col-md-6">
+              <h1 className="text-center">QR Generator</h1>
+              <QRInfoForm handleFormSubmission={this.handleFormSubmission} />
+            </div>
+            <div className="col-12 col-md-6">
+              {imgLink == "" ? "Submit form to generate QR Code" : <img src={imgLink} className="w-100" />}
             </div>
           </div>
         </div>
