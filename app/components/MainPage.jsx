@@ -16,23 +16,11 @@ export class MainPage extends React.Component{
 
   componentDidMount(){
     var that = this;
-    const testObj = [
-      {
-        eventName: "Malcolm website",
-        date: "2019/10/16,2019/09/22,2019/06/06,2019/06/24",
-        website: "http://www.ozorataiyo.com",
-      },
-      {
-        eventName: "はるはのチックトック動画を見ています",
-        date: "2018/10/16-2019/09/22",
-        website: "http://vt.tiktok.com/JAXNDx/",
-      },
-      {
-        eventName: "I love 天月-あまつき- songs",
-        date: "2019/02/16-2019/09/22",
-        website: "https://twitter.com/_amatsuki_",
-      }
-    ]
+    var now = new Date()
+    const testObj = {
+      eventName: "Thank you for coming to our website",
+      date: `${now.getFullYear()}/${now.getMonth()}/${now.getDate()}-${now.getFullYear()+1}/10/16`
+    }
     const opts = {
       errorCorrectionLevel: 'H',
       type: 'image/jpeg',
@@ -44,8 +32,8 @@ export class MainPage extends React.Component{
     const secrets = generateSecrets(10);
     var obj = {}
     do{
-      obj = encryptDataObj(testObj[1], secrets);
-    } while (testObj[1].eventName != decryptDataObj(obj, secrets).eventName);
+      obj = encryptDataObj(testObj, secrets);
+    } while (testObj.eventName != decryptDataObj(obj, secrets).eventName);
     var objText = {
       e: obj.eventName,
       d: obj.date,
@@ -82,4 +70,8 @@ export class MainPage extends React.Component{
   }
 }
 
-export default MainPage;
+export default connect((state) => {
+  return {
+    auth: state.authReducer
+  }
+})(MainPage);

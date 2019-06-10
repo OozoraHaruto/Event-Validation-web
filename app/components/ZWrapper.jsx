@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, NavLink, withRouter } from 'react-router-dom';
+import { NavLink, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
@@ -20,16 +20,20 @@ export class ZWrapper extends React.Component{
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav mr-auto">
               <li className="nav-item">
-                <NavLink className="nav-link" to="/generate" activeClassName="active">Generate QR</NavLink>
+                {(!jQuery.isEmptyObject(this.props.auth)) && <NavLink className="nav-link" to="/generate" activeClassName="active">Generate QR</NavLink>}
+                {(jQuery.isEmptyObject(this.props.auth)) && <NavLink className="nav-link" to="/login" activeClassName="active">Login</NavLink>}
               </li>
+            </ul>
+            <ul className="navbar-nav ml-auto">
+              {(!jQuery.isEmptyObject(this.props.auth)) && <span className="navbar-text">{this.props.auth.name}</span>}
             </ul>
           </div>
         </nav>
+        
         <div style={{ marginTop: '56px' }}>
           {this.props.children}
         </div>
       </div>
-      
     )
   }
 }

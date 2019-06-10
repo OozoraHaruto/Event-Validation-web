@@ -54,6 +54,7 @@ module.exports = {
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         P_10: JSON.stringify(process.env.P_10),
+        USERS: JSON.stringify(process.env.USERS),
       }
     })
   ],

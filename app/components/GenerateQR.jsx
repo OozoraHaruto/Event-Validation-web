@@ -1,14 +1,10 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import DocumentMeta from 'react-document-meta';
-import { Formik } from 'formik';
 
 var QRCode = require('qrcode')
 
 import { generateSecrets, encryptDataObj, decryptDataObj } from 'EncryptionDecryption';
 import QRInfoForm from 'app/components/forms/QRInfoForm';
-
-
 
 export class GenerateQR extends React.Component {
   constructor(props) {
@@ -18,7 +14,7 @@ export class GenerateQR extends React.Component {
     }
   }
 
-  handleFormSubmission = values => {
+  handleFormSubmission = (values, formikBag) => {
     var that              = this;
     const replaceDateDashToSlash = date => date.replace(/-/g, "/");
     const opts            = {
@@ -32,7 +28,7 @@ export class GenerateQR extends React.Component {
     const secrets         = generateSecrets(10);
     var obj               = {
       ...values,
-      date: replaceDateDashToSlash(values.date.toString())
+      date: replaceDateDashToSlash(values.date.sort().toString())
     }
     if(values.dateType == "Range"){
       obj.date            = obj.date.replace(",", "-")
@@ -73,7 +69,7 @@ export class GenerateQR extends React.Component {
               <h1 className="text-center">QR Generator</h1>
               <QRInfoForm handleFormSubmission={this.handleFormSubmission} />
             </div>
-            <div className="col-12 col-md-6">
+            <div className="col-12 col-md-6 text-center">
               {imgLink == "" ? "Submit form to generate QR Code" : <img src={imgLink} className="w-100" />}
             </div>
           </div>

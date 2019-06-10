@@ -1,10 +1,9 @@
 import React from 'react';
 import { Formik, Field, FieldArray, ErrorMessage } from 'formik';
 
-
 const QRInfoForm = props => {
   const { handleFormSubmission }                                  = props;
-  const validate = (values, props) =>{
+  const validate = values =>{
     const errors                                                  = {};
     const now                                                     = new Date();
 
@@ -27,7 +26,7 @@ const QRInfoForm = props => {
         }
         values.date.forEach(function (item, index) {
           if(item == "") dateErrors.fieldEmpty.push((index + 1))
-          else if (new Date(item) < now) dateErrors.fieldInvalid.push((index+1))
+          else if (now > new Date(`${item}T23:59:59`)) dateErrors.fieldInvalid.push((index+1))
         })
         if (dateErrors.fieldEmpty.length != 0) errors.date        = "Dates cannot be blank at index " + dateErrors.fieldEmpty.toString();
         else if (dateErrors.fieldInvalid.length != 0) errors.date = "Date have to be later than now at index " + dateErrors.fieldInvalid.toString();
@@ -45,15 +44,13 @@ const QRInfoForm = props => {
     <div>
       <Formik
         initialValues={{
-          eventName: "はるはのチックトック動画を見ています",
+          eventName: "",
           dateType: "Range",
-          date: ["2018-10-16", "2018-11-16", "2019-10-16"],
-          website: "http://vt.tiktok.com/JAXNDx/",
+          date: ["2009-10-16", "2059-10-16"],
+          website: "",
         }}
         validate={validate}
-        onSubmit={(values, actions) => {
-          handleFormSubmission(values)
-        }}
+        onSubmit={(values, formikBag) => handleFormSubmission(values, formikBag)}
         render={props => (
           <form onSubmit={props.handleSubmit}>
             <div className="form-group">
