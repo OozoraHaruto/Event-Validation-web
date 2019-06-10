@@ -44,7 +44,13 @@ class Login extends React.Component {
 
     return (
       <DocumentMeta {...meta}>
-        <UserLoginForm handleFormSubmission={this.handleUserLogin} />
+        <div className="container-fluid p-0">
+          <div className="d-flex wholePageWithNav justify-content-center align-items-center">
+            <div className="col-xl-3 col-lg-4 col-md-6 col-sm-8 col-12">
+              <UserLoginForm handleFormSubmission={this.handleUserLogin} />
+            </div>
+          </div>
+        </div>
       </DocumentMeta>
     )
   }

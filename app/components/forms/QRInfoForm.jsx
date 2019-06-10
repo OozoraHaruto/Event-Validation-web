@@ -23,12 +23,15 @@ const QRInfoForm = props => {
         var dateErrors                                            = {
           fieldEmpty: [],
           fieldInvalid: [],
+          formatInvalid: [],
         }
         values.date.forEach(function (item, index) {
           if(item == "") dateErrors.fieldEmpty.push((index + 1))
+          else if (!/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})$/i.test(item)) dateErrors.formatInvalid.push((index + 1))
           else if (now > new Date(`${item}T23:59:59`)) dateErrors.fieldInvalid.push((index+1))
         })
-        if (dateErrors.fieldEmpty.length != 0) errors.date        = "Dates cannot be blank at index " + dateErrors.fieldEmpty.toString();
+        if (dateErrors.fieldEmpty.length != 0) errors.date = "Dates cannot be blank at index " + dateErrors.fieldEmpty.toString();
+        else if (dateErrors.formatInvalid.length != 0) errors.date = "Date have to be formatted (YYYY-MM-DD) " + dateErrors.fieldInvalid.toString();
         else if (dateErrors.fieldInvalid.length != 0) errors.date = "Date have to be later than now at index " + dateErrors.fieldInvalid.toString();
       }
     }

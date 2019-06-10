@@ -45,6 +45,6 @@ ul.list-unstyled{
 }
 .wholePageWithNav{
   @extend .maxWidthPage;
+  @extend .maxHeightPageWithNav;
   position: relative;
-  padding: 64px 0 20px 0;
 }
