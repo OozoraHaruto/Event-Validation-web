@@ -1,7 +1,8 @@
 {
-  "name": "React_boilerplate",
-  "version": "2.0.0",
-  "description": "Simple react app boilerplate",
+  "name": "Event Validation",
+  "version": "0.0.1",
+  "description": "Website to generate secured QR Codes",
+  "repository": "github:taiyoOzora/Event-Validation-web",
   "main": "index.js",
   "scripts": {
     "postinstall": "npm run build",
@@ -17,6 +18,7 @@
     "url": "http://www.ozorataiyo.com"
   },
   "license": "UNLICENSED",
+  "private": true,
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
     "@fortawesome/fontawesome-free-brands": "^5.0.13",
