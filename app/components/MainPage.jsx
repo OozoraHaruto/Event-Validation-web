@@ -19,7 +19,8 @@ export class MainPage extends React.Component{
     var now = new Date()
     const testObj = {
       eventName: "Thank you for coming to our website",
-      date: `${now.getFullYear()}/${now.getMonth()}/${now.getDate()}-${now.getFullYear()+1}/10/16`
+      date: `${now.getFullYear()}/${now.getMonth()}/${now.getDate()}-${now.getFullYear()+1}/10/16`,
+      website: ""
     }
     const opts = {
       errorCorrectionLevel: 'H',
@@ -35,9 +36,7 @@ export class MainPage extends React.Component{
       obj = encryptDataObj(testObj, secrets);
     } while (testObj.eventName != decryptDataObj(obj, secrets).eventName);
     var objText = {
-      e: obj.eventName,
-      d: obj.date,
-      w: obj.website,
+      ...obj,
       v: 1.0,                                   // QR version
       l: secrets.pLength,                       // Prime number length
       g: secrets.generatorIndex,                // Generator Index 
@@ -46,6 +45,7 @@ export class MainPage extends React.Component{
       k: secrets.privateBIndex,                 // Private Key
       h: hash,                                  // Hash of un encrypted data
     };
+    if (!objText.w) objText.w = "";
 
     QRCode.toDataURL(JSON.stringify(objText), opts, function (err, url) {
       if (err) throw err

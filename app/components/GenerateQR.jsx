@@ -30,16 +30,12 @@ export class GenerateQR extends React.Component {
       ...values,
       date: replaceDateDashToSlash(values.date.sort().toString())
     }
-    if(values.dateType == "Range"){
-      obj.date            = obj.date.replace(",", "-")
-    }
-    do {
+    if(values.dateType == "Range") obj.date = obj.date.replace(",", "-")
+    do{
       obj                 = encryptDataObj(obj, secrets);
     } while (values.eventName != decryptDataObj(obj, secrets).eventName);
-    var objText           = {
-      e: obj.eventName,
-      d: obj.date,
-      w: obj.website,
+    var objText = {
+      ...obj,
       v: 1.0,                                   // QR version
       l: secrets.pLength,                       // Prime number length
       g: secrets.generatorIndex,                // Generator Index 
@@ -48,6 +44,7 @@ export class GenerateQR extends React.Component {
       k: secrets.privateBIndex,                 // Private Key
       h: hash,                                  // Hash of un encrypted data
     };
+    if (!objText.w) objText.w = "";
 
     QRCode.toDataURL(JSON.stringify(objText), opts, function (err, url) {
       if (err) throw err

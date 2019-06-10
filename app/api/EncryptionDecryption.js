@@ -47,9 +47,11 @@ export const generateSecrets = length => {
 export const encryptDataObj = (obj, secrets) => {
   var tmp                     = {}
   var sharedKey               = generateSharedKey(bigInt(secrets.privateA), bigInt(secrets.publicB), bigInt(secrets.prime));
-  tmp.eventName               = encryptData(obj.eventName, sharedKey, bigInt(secrets.prime), secrets.pLength);
-  tmp.date                    = encryptData(obj.date, sharedKey, bigInt(secrets.prime), secrets.pLength);
-  tmp.website                 = encryptData(obj.website, sharedKey, bigInt(secrets.prime), secrets.pLength);
+  tmp.e                       = encryptData(obj.eventName, sharedKey, bigInt(secrets.prime), secrets.pLength);
+  tmp.d                       = encryptData(obj.date, sharedKey, bigInt(secrets.prime), secrets.pLength);
+  if (obj.website != "") {
+    tmp.w                     = encryptData(obj.website, sharedKey, bigInt(secrets.prime), secrets.pLength);
+  }
   return tmp;
 }
 
@@ -81,9 +83,11 @@ const encryptData = (data, sharedKey, prime, pLength) => {
 export const decryptDataObj = (obj, secrets) => {
   var sharedKey               = generateSharedKey(bigInt(secrets.privateB), bigInt(secrets.publicA), bigInt(secrets.prime))
   var tmp                     = {}
-  tmp.eventName               = decryptData(obj.eventName, sharedKey, bigInt(secrets.prime), secrets.pLength);
-  tmp.date                    = decryptData(obj.date, sharedKey, bigInt(secrets.prime), secrets.pLength);
-  tmp.website                 = decryptData(obj.website, sharedKey, bigInt(secrets.prime), secrets.pLength);
+  tmp.eventName               = decryptData(obj.e, sharedKey, bigInt(secrets.prime), secrets.pLength);
+  tmp.date                    = decryptData(obj.d, sharedKey, bigInt(secrets.prime), secrets.pLength);
+  if (obj.w) {
+    tmp.website               = decryptData(obj.w, sharedKey, bigInt(secrets.prime), secrets.pLength);
+  }
   return tmp;
 }
 
